@@ -1,0 +1,10 @@
+version: '2'
+services:
+
+  app:
+    image: irppj:working
+    ports:
+    - 80:80
+    volumes:
+    - /Users/chazerod/gitHub_srcCode/IRPrj/IRPrjectAPIServer/app:/usr/local/etc/app
+
