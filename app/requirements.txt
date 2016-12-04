@@ -3,3 +3,4 @@ python-dateutil==2.5.3
 requests==2.10.0
 tornado==4.4.1
 voluptuous==0.8.9
+python-google-places==1.2.0

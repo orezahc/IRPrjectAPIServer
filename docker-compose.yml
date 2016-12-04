@@ -6,5 +6,5 @@ services:
     ports:
     - 80:80
     volumes:
-    - /Users/chazerod/gitHub_srcCode/IRPrj/IRPrjectAPIServer/app:/usr/local/etc/app
+    - /Users/chazerod/gitHub_srcCode/IRPrj/IRProjectAPIServer/app:/usr/local/etc/app
 
