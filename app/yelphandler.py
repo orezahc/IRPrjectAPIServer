@@ -44,18 +44,17 @@ class YelpHandler(tornado.web.RequestHandler):
 
     def _yelpPlaceGet(self, keyStr = None):
         yelp_places = Client(auth)
-        response=client.search(keyStr, **params)
-
+        params["term"] = keyStr;
+        response=yelp_places.search("seattle", **params)
                 
         pp = pprint.PrettyPrinter(indent=4)
 
         datadict = []
         for result in response.businesses:
-            data = {"name":str(item.name), 
-			"phone":str(item.phone), 
-			"url":str(item.url)}
-		datadict.append(data)
-
+            data = {"name":str(result.name), 
+			"phone":str(result.phone), 
+            "url":str(result.url)}
+            datadict.append(data)
         pp.pprint(datadict)
         return datadict
 

@@ -10,6 +10,8 @@ import logging
 import os
 import sys
 
+import googlehandler
+import yelphandler
 
 _PRETTY_FORMAT = '%(asctime)s :: %(levelname)s :: %(name)s :: %(message)s'
 _logger = logging.getLogger(__name__)
@@ -34,7 +36,8 @@ if __name__ == '__main__':
     ioloop = asyncio.get_event_loop()
 
     app = tornado.web.Application([
-        (r"/(?P<restaurantName>.*)", handler.Handler),
+        (r"/api/google/(?P<restaurantName>.*)", googlehandler.GoogleHandler),
+        (r"/api/yelp/(?P<restaurantName>.*)", yelphandler.YelpHandler)
     ])
 
 
