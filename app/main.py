@@ -35,8 +35,8 @@ if __name__ == '__main__':
     ioloop = asyncio.get_event_loop()
 
     app = tornado.web.Application([
-        (r"/api/google/(?P<restaurantName>.*)", googlehandler.googleHandler),
-        (r"/api/yelp/(?P<restaurantName>.*)", yelphandler.yelpHandler)
+        (r"/api/google/(?P<restaurantName>.*)", googlehandler.GoogleHandler),
+        (r"/api/yelp/(?P<restaurantName>.*)", yelphandler.YelpHandler)
     ])
 
 

@@ -4,7 +4,7 @@ services:
   app:
     image: irppj-google:latest
     ports:
-    - 80:80
-    # volumes:
-    # - /Users/chazerod/gitHub_srcCode/IRPrj/IRProjectAPIServer/app:/usr/local/etc/app
+    - 8088:80
+    volumes:
+    - /Users/chazerod/gitHub_srcCode/IRPrj/IRProjectAPIServer/app:/usr/local/etc/app
 
