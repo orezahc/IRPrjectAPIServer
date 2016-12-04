@@ -3,12 +3,12 @@
 ##### build up the docker image and run in the docker container
 ```
 cd IRProjectAPIServer
-docker build -t irppj-google:latest .
+docker build -t chchao/irproject-googele:latest .
 docker-compose up [-d]
 ```
 ##### api is ready in port 80
 
-api: <ipaddress>/<restaurant-name>
+api: <ipaddress>/api/google/<restaurant-name>
 
 expected request: 
 ```
