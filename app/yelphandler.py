@@ -37,8 +37,6 @@ params = {
     'term': 'food',
 }
 
->>>>>>> yelp-lee
-
 # Handlers
 
 class YelpHandler(tornado.web.RequestHandler):
