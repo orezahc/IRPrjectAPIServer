@@ -17,13 +17,14 @@ import pprint
 # Constants
 
 API_KEY = 'AIzaSyDCxN6faBfPjZFMJumlb-93DMYVQo3wC3Q'
-
 _logger = logging.getLogger(__name__)
 
-# helper
 
+# Handlers
 
-def _googlePlaceGet(keyStr = None, location='Seattle'):
+class GoogleHandler(tornado.web.RequestHandler):
+
+    def _googlePlaceGet(self, keyStr = None, location='Seattle'):
     google_places = GooglePlaces(API_KEY)
 
     if keyStr == '':
@@ -40,9 +41,6 @@ def _googlePlaceGet(keyStr = None, location='Seattle'):
 
     pp = pprint.PrettyPrinter(indent=4)
 
-    if query_result.has_attributions:
-        print(query_result.html_attributions)
-
     datadict = []
     for result in query_result.raw_response['results']:
         data = {}
@@ -52,6 +50,7 @@ def _googlePlaceGet(keyStr = None, location='Seattle'):
             data['rating'] = float(place['rating'])
         except:
             data['rating'] = ''
+
         data['contact'] = {
             'url': place['url'], 
             'address': place['formatted_address'],
@@ -62,6 +61,7 @@ def _googlePlaceGet(keyStr = None, location='Seattle'):
             data['price'] = float(result['price_level'])
         except:
             data['price'] = ''
+            
         data['geometry'] = {
             'lat': float(place['geometry']['location']['lat']),
             'lng': float(place['geometry']['location']['lng'])
@@ -71,8 +71,6 @@ def _googlePlaceGet(keyStr = None, location='Seattle'):
     pp.pprint(datadict)
     return datadict
 
-# Handlers
-class Handler(tornado.web.RequestHandler):
 
     async def get(self, restaurantName):
         '''
@@ -84,7 +82,35 @@ class Handler(tornado.web.RequestHandler):
         correlationId : str
             The correlation id associated to the ACK of scores.
         '''
-        
+
+        data = self._googlePlaceGet(keyStr=restaurantName)
+        result = {
+            'metadata': {
+                'keyword': restaurantName,
+                'timestamp' : int(time.time())
+            },
+            'data': data
+        }
+        self.set_status(200)
+        self.set_header('Content-Type', 'application/json; charset="utf-8"')
+        self.finish(json.dumps(result))
+
+
+# Handlers
+
+class yelpHandler(tornado.web.RequestHandler):
+
+    async def get(self, restaurantName):
+        '''
+        Receives ACK of scores from phillips to ensures the scores sent from us
+        are received.
+
+        Parameters
+        ----------
+        correlationId : str
+            The correlation id associated to the ACK of scores.
+        '''
+
         data = _googlePlaceGet(keyStr=restaurantName)
         result = {
             'metadata': {
@@ -96,5 +122,5 @@ class Handler(tornado.web.RequestHandler):
         self.set_status(200)
         self.set_header('Content-Type', 'application/json; charset="utf-8"')
         self.finish(json.dumps(result))
-        # self.finish('Received request : {}'.format(restaurantName))
+
 

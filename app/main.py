@@ -4,7 +4,8 @@ import asyncio
 import tornado
 import tornado.web
 import tornado.platform.asyncio
-import handler
+import googlehandler
+import yelphandler
 import bunyan
 import logging
 import os
@@ -34,7 +35,8 @@ if __name__ == '__main__':
     ioloop = asyncio.get_event_loop()
 
     app = tornado.web.Application([
-        (r"/(?P<restaurantName>.*)", handler.Handler),
+        (r"/api/google/(?P<restaurantName>.*)", googlehandler.googleHandler),
+        (r"/api/yelp/(?P<restaurantName>.*)", yelphandler.yelpHandler)
     ])
 
 
