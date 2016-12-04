@@ -1,5 +1,6 @@
 # Imports
 
+import aiohttp
 import asyncio
 import json
 import logging
@@ -17,6 +18,7 @@ import pprint
 # Constants
 
 API_KEY = 'AIzaSyDCxN6faBfPjZFMJumlb-93DMYVQo3wC3Q'
+BASE_URI = 'https://maps.googleapis.com/maps/api/place/details/json?placeid={placeid}&key={key}'
 _logger = logging.getLogger(__name__)
 
 
@@ -24,7 +26,43 @@ _logger = logging.getLogger(__name__)
 
 class GoogleHandler(tornado.web.RequestHandler):
 
-    def _googlePlaceGet(self, keyStr = None, location='Seattle'):
+    async def _getPlace(self, google_places, raw_response, i):
+        output = {}
+        result = raw_response['results'][i]
+        uri = BASE_URI.format(key=API_KEY, placeid=result['place_id'])
+
+        response = await aiohttp.get(uri)
+        data = await response.text()
+        data = json.loads(data)
+        output['name'] = data['result']['name']
+        output['contact'] = {
+            'url': data['result']['website'], 
+            'address': data['result']['formatted_address'],
+            'phone': data['result']['formatted_phone_number']
+        }
+
+        output['open'] = data['result']['opening_hours']['open_now']
+
+        output['geometry'] = {
+            'lat': float(data['result']['geometry']['location']['lat']),
+            'lng': float(data['result']['geometry']['location']['lng'])
+        }
+
+
+        try:
+            output['rating'] = float(data['result']['rating'])
+        except:
+            output['rating'] = ''
+
+        try:
+            output['price'] = float(result['price_level'])
+        except:
+            output['price'] = ''
+            
+        return output
+
+
+    async def _googlePlaceGet(self, keyStr = None, location='Seattle'):
         google_places = GooglePlaces(API_KEY)
 
         if keyStr == '':
@@ -39,36 +77,14 @@ class GoogleHandler(tornado.web.RequestHandler):
                 radius=20000,
                 types=[types.TYPE_RESTAURANT])
 
-        pp = pprint.PrettyPrinter(indent=4)
-
         datadict = []
-        for result in query_result.raw_response['results']:
-            data = {}
-            place = google_places.get_place(place_id=result['place_id']).details
-            data['name'] = place['name']
-            try:
-                data['rating'] = float(place['rating'])
-            except:
-                data['rating'] = ''
+        
+        tasks = [self._getPlace(google_places, query_result.raw_response, i)
+                    for i in range(len(query_result.raw_response['results']))]
 
-            data['contact'] = {
-                'url': place['url'], 
-                'address': place['formatted_address'],
-                'phone': place['formatted_phone_number']
-            }
-            data['open'] = place['opening_hours']['open_now']
-            try:
-                data['price'] = float(result['price_level'])
-            except:
-                data['price'] = ''
-                
-            data['geometry'] = {
-                'lat': float(place['geometry']['location']['lat']),
-                'lng': float(place['geometry']['location']['lng'])
-            }
-            datadict.append(data)
+        for data in asyncio.as_completed(tasks):
+            datadict.append(await data)
 
-        pp.pprint(datadict)
         return datadict
 
 
@@ -83,7 +99,7 @@ class GoogleHandler(tornado.web.RequestHandler):
             The correlation id associated to the ACK of scores.
         '''
 
-        data = self._googlePlaceGet(keyStr=restaurantName)
+        data = await self._googlePlaceGet(keyStr=restaurantName)
         result = {
             'metadata': {
                 'keyword': restaurantName,

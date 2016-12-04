@@ -1,3 +1,4 @@
+aiohttp==1.0.5
 bunyan==0.1.2
 python-dateutil==2.5.3
 requests==2.10.0
