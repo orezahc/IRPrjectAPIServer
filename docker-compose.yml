@@ -2,9 +2,9 @@ version: '2'
 services:
 
   app:
-    image: irppj:working
+    image: irppj-google:latest
     ports:
     - 80:80
-    volumes:
-    - /Users/chazerod/gitHub_srcCode/IRPrj/IRProjectAPIServer/app:/usr/local/etc/app
+    # volumes:
+    # - /Users/chazerod/gitHub_srcCode/IRPrj/IRProjectAPIServer/app:/usr/local/etc/app
 
