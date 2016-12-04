@@ -11,6 +11,8 @@ import logging
 import os
 import sys
 
+import googlehandler
+import yelphandler
 
 _PRETTY_FORMAT = '%(asctime)s :: %(levelname)s :: %(name)s :: %(message)s'
 _logger = logging.getLogger(__name__)

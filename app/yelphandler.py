@@ -11,6 +11,8 @@ import bunyan
 import os
 import sys
 from googleplaces import GooglePlaces, types, lang
+from yelp.client import Client
+from yelp.oauth1_authenticator import Oauth1Authenticator
 import pprint
 
 
@@ -19,53 +21,40 @@ import pprint
 API_KEY = 'AIzaSyDCxN6faBfPjZFMJumlb-93DMYVQo3wC3Q'
 _logger = logging.getLogger(__name__)
 
+YOUR_CONSUMER_KEY='KlDUFYwisNqBpymidMf3RA'
+YOUR_CONSUMER_SECRET='7_PkdA-TptR0sm6vplmo2RMl650'
+YOUR_TOKEN='IWBrJcXRmEs9t_YUiV182jpNusLTS_c6'
+YOUR_TOKEN_SECRET='x8_mBE63WQabSQhBnx2h-GX9SsQ'
+    
+auth = Oauth1Authenticator(
+    consumer_key=YOUR_CONSUMER_KEY,
+    consumer_secret=YOUR_CONSUMER_SECRET,
+    token=YOUR_TOKEN,
+    token_secret=YOUR_TOKEN_SECRET
+)
+
+params = {
+    'term': 'food',
+}
+
+>>>>>>> yelp-lee
 
 # Handlers
 
 class YelpHandler(tornado.web.RequestHandler):
 
-    def _yelpPlaceGet(self, keyStr = None, location='Seattle'):
-        google_places = GooglePlaces(API_KEY)
-
-        if keyStr == '':
-            query_result = google_places.nearby_search(
-                keyword=keyStr,
-                location=location,
-                radius=20000,
-                types=[types.TYPE_RESTAURANT])
-        else:
-            query_result = google_places.nearby_search(
-                location=location,
-                radius=20000,
-                types=[types.TYPE_RESTAURANT])
-
+    def _yelpPlaceGet(self, keyStr = None):
+        yelp_places = Client(auth)
+        params["term"] = keyStr;
+        response=yelp_places.search("seattle", **params)
+                
         pp = pprint.PrettyPrinter(indent=4)
 
         datadict = []
-        for result in query_result.raw_response['results']:
-            data = {}
-            place = google_places.get_place(place_id=result['place_id']).details
-            data['name'] = place['name']
-            try:
-                data['rating'] = float(place['rating'])
-            except:
-                data['rating'] = ''
-
-            data['contact'] = {
-                'url': place['url'], 
-                'address': place['formatted_address'],
-                'phone': place['formatted_phone_number']
-            }
-            data['open'] = place['opening_hours']['open_now']
-            try:
-                data['price'] = float(result['price_level'])
-            except:
-                data['price'] = ''
-                
-            data['geometry'] = {
-                'lat': float(place['geometry']['location']['lat']),
-                'lng': float(place['geometry']['location']['lng'])
-            }
+        for result in response.businesses:
+            data = {"name":str(result.name), 
+			"phone":str(result.phone), 
+            "url":str(result.url)}
             datadict.append(data)
 
         pp.pprint(datadict)
@@ -83,7 +72,7 @@ class YelpHandler(tornado.web.RequestHandler):
             The correlation id associated to the ACK of scores.
         '''
 
-        data = self._googlePlaceGet(keyStr=restaurantName)
+        data = self._yelpPlaceGet(keyStr=restaurantName)
         result = {
             'metadata': {
                 'keyword': restaurantName,
