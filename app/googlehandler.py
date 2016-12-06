@@ -26,10 +26,14 @@ _logger = logging.getLogger(__name__)
 
 class GoogleHandler(tornado.web.RequestHandler):
 
+    def initialize(self, key):
+        self._api_key = key
+        _logger.info('Google API secret key {}.'.format(self._api_key))
+
     async def _getPlace(self, google_places, raw_response, i):
         output = {}
         result = raw_response['results'][i]
-        uri = BASE_URI.format(key=API_KEY, placeid=result['place_id'])
+        uri = BASE_URI.format(key=self._api_key, placeid=result['place_id'])
 
         response = await aiohttp.get(uri)
         data = await response.text()
@@ -40,14 +44,11 @@ class GoogleHandler(tornado.web.RequestHandler):
             'address': data['result']['formatted_address'],
             'phone': data['result']['formatted_phone_number']
         }
-
         output['open'] = data['result']['opening_hours']['open_now']
-
         output['geometry'] = {
             'lat': float(data['result']['geometry']['location']['lat']),
             'lng': float(data['result']['geometry']['location']['lng'])
         }
-
 
         try:
             output['rating'] = float(data['result']['rating'])
@@ -62,12 +63,12 @@ class GoogleHandler(tornado.web.RequestHandler):
         return output
 
 
-    async def _googlePlaceGet(self, keyStr = None, location='Seattle'):
-        google_places = GooglePlaces(API_KEY)
+    async def _googlePlaceGet(self, key_str = None, location='Seattle'):
+        google_places = GooglePlaces(self._api_key)
 
-        if keyStr == '':
+        if key_str != '':
             query_result = google_places.nearby_search(
-                keyword=keyStr,
+                keyword=key_str,
                 location=location,
                 radius=20000,
                 types=[types.TYPE_RESTAURANT])
@@ -78,9 +79,12 @@ class GoogleHandler(tornado.web.RequestHandler):
                 types=[types.TYPE_RESTAURANT])
 
         datadict = []
-        
+        n_queries = len(query_result.raw_response['results'])
+        if n_queries > 3:
+            n_queries = 3
+
         tasks = [self._getPlace(google_places, query_result.raw_response, i)
-                    for i in range(len(query_result.raw_response['results']))]
+                    for i in range(n_queries)]
 
         for data in asyncio.as_completed(tasks):
             datadict.append(await data)
@@ -99,7 +103,7 @@ class GoogleHandler(tornado.web.RequestHandler):
             The correlation id associated to the ACK of scores.
         '''
 
-        data = await self._googlePlaceGet(keyStr=restaurantName)
+        data = await self._googlePlaceGet(key_str=restaurantName)
         result = {
             'metadata': {
                 'keyword': restaurantName,

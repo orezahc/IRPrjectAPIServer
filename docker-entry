@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 /usr/local/etc/app/main.py
+python3 /usr/local/etc/app/main.py $*
