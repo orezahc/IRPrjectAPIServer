@@ -3,7 +3,7 @@ services:
 
   app:
     command: -secret-key AIzaSyDCxN6faBfPjZFMJumlb-93DMYVQo3wC3Q
-    image: chchao/irproject-googele:latest
+    image: chchao/irproject-google:latest
     ports:
     - 8088:80
     volumes:
