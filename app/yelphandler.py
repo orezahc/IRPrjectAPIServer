@@ -18,7 +18,7 @@ import pprint
 
 # Constants
 
-API_KEY = 'AIzaSyDCxN6faBfPjZFMJumlb-93DMYVQo3wC3Q'
+API_KEY = 'A-KEY'
 _logger = logging.getLogger(__name__)
 
 YOUR_CONSUMER_KEY='KlDUFYwisNqBpymidMf3RA'
