@@ -17,7 +17,7 @@ import pprint
 
 # Constants
 
-API_KEY = 'AIzaSyDCxN6faBfPjZFMJumlb-93DMYVQo3wC3Q'
+API_KEY = 'A-KEY'
 BASE_URI = 'https://maps.googleapis.com/maps/api/place/details/json?placeid={placeid}&key={key}'
 _logger = logging.getLogger(__name__)
 
